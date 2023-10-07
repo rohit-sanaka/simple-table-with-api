@@ -1,12 +1,15 @@
 import { Controller, useFormContext } from 'react-hook-form'
-import { TextField as MuiTextField } from '@mui/material'
+import { TextField as MuiTextField, FormHelperText } from '@mui/material'
 
 // import { AnyObject } from 'yup'
 // import { useContext } from 'react'
 // import { ValidationContext } from '../components/NewAccountForm'
 
 const TextField = ({ name, label, required }: { name: string; label: string; required?: boolean }) => {
-  const { control, formState:{errors} } = useFormContext()
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext()
 
   // const validationSchema = useContext(ValidationContext)
   // const required =
@@ -20,17 +23,18 @@ const TextField = ({ name, label, required }: { name: string; label: string; req
       defaultValue=''
       render={({ field: { onChange, value }, fieldState: { error } }) => {
         return (
-          <MuiTextField
-            helperText={error ? error.message : ''}
-            size='small'
-            error={!!error}
-            onChange={onChange}
-            required={required}
-            value={value}
-            fullWidth
-            label={label}
-            variant='outlined'
-          />
+          <>
+            <MuiTextField
+              error={!!error}
+              onChange={onChange}
+              required={required}
+              value={value}
+              label={label}
+              fullWidth
+              variant='outlined'
+            />
+            <FormHelperText error={!!error}>{error ? error.message : ''}</FormHelperText>
+          </>
         )
       }}
     />

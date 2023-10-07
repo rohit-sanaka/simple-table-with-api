@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import UserService from '../services/UserService'
-import { createContext } from 'react'
+import { createContext, useReducer } from 'react'
 import { User, UserList } from '../types/User'
-import { useState, useMemo, useEffect, Fragment } from 'react'
+import { useState, useMemo, useEffect, Fragment, Reducer } from 'react'
 import {
   MaterialReactTable,
   MRT_PaginationState,
@@ -14,7 +14,7 @@ import {
   MRT_ToggleGlobalFilterButton,
   MRT_Row,
 } from 'material-react-table'
-import { IconButton, Tooltip, Box } from '@mui/material'
+import { IconButton, Tooltip, Box, Snackbar, Alert } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import PrintIcon from '@mui/icons-material/Print'
 import AddIcon from '@mui/icons-material/Add'
@@ -22,22 +22,74 @@ import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import CreateNewAccountModal from './CreateNewAccountDialog'
 import DeleteCofimationModel from './DeleteCofimationModel'
-import { AxiosError, AxiosResponse } from 'axios'
+import { InititalStateType, actionType } from '../types/UserTable'
 
-export const createAccountDialogContext = createContext<{
-  open: boolean
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>
+const initialState = {
+  create: {
+    openDialog: false,
+    openAlert: false,
+  },
+  edit: {
+    openDialog: false,
+    openAlert: false,
+    rowData: null,
+  },
+  delete: {
+    openDialog: false,
+    openAlert: false,
+    rowData: null,
+  },
+}
+
+export const modalAndAlertStateContext = createContext<{
+  modalAndAlertState: InititalStateType
+  dispatch: React.Dispatch<actionType>
 }>({
-  open: false,
-  setOpen: () => {},
+  modalAndAlertState: initialState,
+  dispatch: () => {},
 })
 
+const reducerFunc = (state: InititalStateType, action: actionType) => {
+  switch (action.type) {
+    case 'OPEN_CREATE_DIALOG':
+      return { ...state, create: { ...state.create, openDialog: true } }
+    case 'CLOSE_CREATE_DIALOG':
+      return { ...state, create: { ...state.create, openDialog: false, openAlert: true } }
+    // case 'OPEN_CREATE_ALERT':
+    //   return { ...state, create: { ...state.create, openAlert: true } }
+    case 'CLOSE_CREATE_ALERT':
+      return { ...state, create: { ...state.create, openAlert: false } }
+
+    case 'OPEN_EDIT_DIALOG':
+      return { ...state, edit: { ...state.edit, openDialog: true, rowData: action.payload } }
+    case 'CLOSE_EDIT_DIALOG':
+      return { ...state, edit: { ...state.edit, openDialog: false, rowData: null, openAlert: true } }
+    // case 'OPEN_EDIT_ALERT':
+    //   return { ...state, edit: { ...state.edit, openAlert: true } }
+    case 'CLOSE_EDIT_ALERT':
+      return { ...state, edit: { ...state.edit, openAlert: false } }
+
+    case 'OPEN_DELETE_DIALOG':
+      return { ...state, delete: { ...state.delete, openDialog: true, rowData: action.payload } }
+    case 'CLOSE_DELETE_DIALOG':
+      return { ...state, delete: { ...state.delete, openDialog: false, rowData: null, openAlert: true } }
+    // case 'OPEN_DELETE_ALERT':
+    //   return { ...state, delete: { ...state.delete, openAlert: true } }
+    case 'CLOSE_DELETE_ALERT':
+      return { ...state, delete: { ...state.delete, openAlert: false } }
+    default:
+      return state
+  }
+}
+
 const UserTable = () => {
-  const [createModalOpen, setCreateModalOpen] = useState(false)
-  const [editModalOpen, setEditModalOpen] = useState(false)
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  const [editRowData, setEditRowData] = useState<User>({} as User)
-  const [deleteRowData, setDeleteRowData] = useState<User>({} as User)
+  const [modalAndAlertState, dispatch] = useReducer<Reducer<InititalStateType, actionType>>(reducerFunc, initialState)
+
+  // const [createModalOpen, setCreateModalOpen] = useState(false)
+  // const [editModalOpen, setEditModalOpen] = useState(false)
+  // const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  // const [editRowData, setEditRowData] = useState<User>({} as User)
+  // const [deleteRowData, setDeleteRowData] = useState<User>({} as User)
   const [pagination, setPagination] = useState<MRT_PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -53,7 +105,6 @@ const UserTable = () => {
   } = useQuery<UserList, Error>({
     queryKey: ['Users'],
     queryFn: async () => await UserService.getUsers(pagination.pageIndex, pagination.pageSize),
-    enabled: false,
     keepPreviousData: true,
     retry: 2,
   })
@@ -63,22 +114,18 @@ const UserTable = () => {
     mutationFn: async (user: User) => await UserService.createUser(user),
   })
 
-  const { mutate: deleteAccount } = useMutation({
-    mutationKey: ['Delete User'],
-    mutationFn: async (id: string) => await UserService.deleteUser(id),
-    onSuccess: () => {
-      setDeleteModalOpen(false)
-      alert('Account Deleted successfully')
-      refetchUsers()
-    },
-    onError: (error: AxiosError) => {
-      alert(error?.message)
-    },
-  })
-
   useEffect(() => {
     refetchUsers()
   }, [pagination])
+
+  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return
+    }
+    modalAndAlertState.create.openAlert && dispatch({ type: 'CLOSE_CREATE_ALERT' })
+    modalAndAlertState.edit.openAlert && dispatch({ type: 'CLOSE_EDIT_ALERT' })
+    modalAndAlertState.delete.openAlert && dispatch({ type: 'CLOSE_DELETE_ALERT' })
+  }
 
   // const handleDeleteRow = (row: MRT_Row<User>) => {
   //   if (!confirm(`Are you sure you want to delete ${row.getValue('firstName')}`)) {
@@ -169,14 +216,12 @@ const UserTable = () => {
         initialState={{
           density: 'compact',
         }}
-        renderRowActions={({ row, table }) => {
+        renderRowActions={({ row }) => {
           return (
             <div>
-              {/* <IconButton onClick={() => table.setEditingRow(row)} title='Edit'> */}
               <IconButton
                 onClick={() => {
-                  setEditRowData({ ...row.original })
-                  setEditModalOpen(true)
+                  dispatch({ type: 'OPEN_EDIT_DIALOG', payload: row.original })
                 }}
                 title='Edit'
               >
@@ -184,8 +229,7 @@ const UserTable = () => {
               </IconButton>
               <IconButton
                 onClick={() => {
-                  setDeleteRowData({ ...row.original })
-                  setDeleteModalOpen(true)
+                  dispatch({ type: 'OPEN_DELETE_DIALOG', payload: row.original })
                 }}
                 title='Delete'
               >
@@ -212,7 +256,7 @@ const UserTable = () => {
               </IconButton>
             </Tooltip>
             <Tooltip arrow title='Create New Account'>
-              <IconButton onClick={() => setCreateModalOpen(true)}>
+              <IconButton onClick={() => dispatch({ type: 'OPEN_CREATE_DIALOG' })}>
                 <AddIcon />
               </IconButton>
             </Tooltip>
@@ -239,19 +283,41 @@ const UserTable = () => {
           isLoading,
           pagination,
           showAlertBanner: isError,
-          showProgressBars: isFetching,
+          showProgressBars: isFetching || isLoading,
         }}
       />
-      <createAccountDialogContext.Provider value={{ open: createModalOpen, setOpen: setCreateModalOpen }}>
+      <modalAndAlertStateContext.Provider value={{ modalAndAlertState: modalAndAlertState, dispatch: dispatch }}>
         <CreateNewAccountModal />
-      </createAccountDialogContext.Provider>
-      
-      <DeleteCofimationModel
-        user={deleteRowData}
-        open={deleteModalOpen}
-        setOpen={setDeleteModalOpen}
-        deleteAccount={deleteAccount}
-      />
+        <DeleteCofimationModel />
+      </modalAndAlertStateContext.Provider>
+
+      <Snackbar
+        open={
+          modalAndAlertState.create.openAlert ||
+          modalAndAlertState.delete.openAlert ||
+          modalAndAlertState.edit.openAlert
+        }
+        autoHideDuration={6000}
+        onClose={handleClose}
+      >
+        <div>
+          {modalAndAlertState.create.openAlert && (
+            <Alert severity='success' sx={{ width: '100%' }} onClose={handleClose}>
+              Account Create Successfully
+            </Alert>
+          )}
+          {modalAndAlertState.edit.openAlert && (
+            <Alert severity='success' sx={{ width: '100%' }} onClose={handleClose}>
+              Account Updated Successfully
+            </Alert>
+          )}
+          {modalAndAlertState.delete.openAlert && (
+            <Alert severity='success' sx={{ width: '100%' }} onClose={handleClose}>
+              Account Deleted Successfully
+            </Alert>
+          )}
+        </div>
+      </Snackbar>
     </div>
   )
 }
