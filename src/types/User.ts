@@ -1,11 +1,3 @@
-// export type User = {
-//   id: string
-//   title: 'ms' | 'mrs' | 'miss' | 'mr'
-//   firstName: string
-//   lastName: string
-//   picture: string
-// }
-
 export type User = {
   id: string
   title?: 'mr' | 'ms' | 'mrs' | 'miss' | 'dr'
@@ -13,11 +5,12 @@ export type User = {
   lastName: string
   gender?: 'male' | 'female' | 'other'
   email: string
-  dateOfBirth?: string
-  registerDate: string
-  phone?: string
   picture?: string
-  location?: object
+  dateOfBirth?:  Date;
+  phone?:        string;
+  location?:     Location;
+  registerDate?: Date;
+  updatedDate?:  Date;
 }
 
 export type UserList = {
@@ -26,3 +19,12 @@ export type UserList = {
   page: number
   limit: number
 }
+
+export type Location = {
+  street?:   string;
+  city?:     string;
+  state?:    string;
+  country?:  string;
+  timezone?: string;
+}
+

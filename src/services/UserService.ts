@@ -12,6 +12,15 @@ const getAllUsers = async () => {
   const responce = await apiClient.get<UserList[]>('/user')
   return responce
 }
+const getUser = async (id: string) => {
+  const responce = await apiClient.get<User>(`/user/${id}`)
+  console.log(responce.data)
+  return responce.data
+}
+
+// getUser('60d0fe4f5311236168a109cc').then(() => {
+//   console.log('done')
+// })
 
 const getUsers = async (page: number, limit: number) => {
   const responce = await apiClient.get<UserList>(`/user/?page=${page}&limit=${limit}`)
@@ -39,6 +48,7 @@ const UserService = {
   createUser,
   editUser,
   deleteUser,
+  getUser
 }
 
 export default UserService

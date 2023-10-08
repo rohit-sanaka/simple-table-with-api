@@ -24,7 +24,7 @@ const DeleteCofimationModel = () => {
     mutationFn: async (id: string) => await UserService.deleteUser(id),
     onSuccess: () => {
       dispatch({ type: 'CLOSE_DELETE_DIALOG' })
-      // dispatch({ type: 'OPEN_DELETE_ALERT' })
+      dispatch({ type: 'OPEN_DELETE_ALERT' })
       queryClient.invalidateQueries(['Users'])
     },
     onError: (error: AxiosError) => {

@@ -10,6 +10,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import UserService from '../services/UserService'
 import { AxiosError, AxiosResponse } from 'axios'
 import Select from '../RHF_Input_Templets/RHF_SelectField'
+import Radio from '../RHF_Input_Templets/RHF_RadioGroup'
+import DatePicker from '../RHF_Input_Templets/RHF_DatePicker'
 
 const titleOptinos = [
   { value: '', label: '--None--' },
@@ -20,8 +22,15 @@ const titleOptinos = [
   { value: 'dr', label: 'Dr' },
 ]
 
+const genderOptions = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'other', label: 'Other' },
+]
+
 const schema: yup.AnyObjectSchema = yup.object().shape({
   title: yup.string().required('Title is required'),
+  gender: yup.string().required('Title is required'),
   firstName: yup
     .string()
     .required('Fisrt Name is required')
@@ -33,6 +42,7 @@ const schema: yup.AnyObjectSchema = yup.object().shape({
     .min(2, 'Last Name must be at least 2 characters')
     .max(50, 'Last Name can be at most 50 characters'),
   email: yup.string().required('Email is required').email('Invalid email'),
+  dateOfBirth: yup.date().required('Date of Birth is required'),
 })
 
 const CreateAccountForm = () => {
@@ -58,7 +68,7 @@ const CreateAccountForm = () => {
       queryClient.invalidateQueries(['Users'])
       // setOpen(false)
       dispatch({ type: 'CLOSE_CREATE_DIALOG' })
-      // dispatch({ type: 'OPEN_CREATE_ALERT' })
+      dispatch({ type: 'OPEN_CREATE_ALERT' })
     },
 
     onError: (error: AxiosError<AxiosResponse>) => {
@@ -82,7 +92,7 @@ const CreateAccountForm = () => {
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} noValidate>
+      <form onSubmit={methods.handleSubmit(onSubmit)} noValidate autoComplete='off' className='px-2 py-5'>
         <Grid container spacing={2}>
           <Grid item xs={2}>
             <Select name='title' label='Title' required={true} options={titleOptinos} />
@@ -93,8 +103,14 @@ const CreateAccountForm = () => {
           <Grid item xs={5}>
             <TextField name='lastName' label='Last Name' required={true} />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={6}>
             <TextField name='email' label='Email' required={true} />
+          </Grid>
+          <Grid item xs={6}>
+            <DatePicker name='dateOfBirth' label='Date of Birth' required={true} />
+          </Grid>
+          <Grid item xs={6}>
+            <Radio name='gender' label='Gender' required={true} options={genderOptions} direction='row' />
           </Grid>
           <Grid item xs={12}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'end', gap: 2 }}>

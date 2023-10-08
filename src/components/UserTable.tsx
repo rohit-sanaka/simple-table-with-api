@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import UserService from '../services/UserService'
 import { createContext, useReducer } from 'react'
 import { User, UserList } from '../types/User'
@@ -12,7 +12,6 @@ import {
   MRT_ShowHideColumnsButton,
   MRT_ToggleFiltersButton,
   MRT_ToggleGlobalFilterButton,
-  MRT_Row,
 } from 'material-react-table'
 import { IconButton, Tooltip, Box, Snackbar, Alert } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
@@ -54,27 +53,27 @@ const reducerFunc = (state: InititalStateType, action: actionType) => {
     case 'OPEN_CREATE_DIALOG':
       return { ...state, create: { ...state.create, openDialog: true } }
     case 'CLOSE_CREATE_DIALOG':
-      return { ...state, create: { ...state.create, openDialog: false, openAlert: true } }
-    // case 'OPEN_CREATE_ALERT':
-    //   return { ...state, create: { ...state.create, openAlert: true } }
+      return { ...state, create: { ...state.create, openDialog: false } }
+    case 'OPEN_CREATE_ALERT':
+      return { ...state, create: { ...state.create, openAlert: true } }
     case 'CLOSE_CREATE_ALERT':
       return { ...state, create: { ...state.create, openAlert: false } }
 
     case 'OPEN_EDIT_DIALOG':
       return { ...state, edit: { ...state.edit, openDialog: true, rowData: action.payload } }
     case 'CLOSE_EDIT_DIALOG':
-      return { ...state, edit: { ...state.edit, openDialog: false, rowData: null, openAlert: true } }
-    // case 'OPEN_EDIT_ALERT':
-    //   return { ...state, edit: { ...state.edit, openAlert: true } }
+      return { ...state, edit: { ...state.edit, openDialog: false, rowData: null } }
+    case 'OPEN_EDIT_ALERT':
+      return { ...state, edit: { ...state.edit, openAlert: true } }
     case 'CLOSE_EDIT_ALERT':
       return { ...state, edit: { ...state.edit, openAlert: false } }
 
     case 'OPEN_DELETE_DIALOG':
       return { ...state, delete: { ...state.delete, openDialog: true, rowData: action.payload } }
     case 'CLOSE_DELETE_DIALOG':
-      return { ...state, delete: { ...state.delete, openDialog: false, rowData: null, openAlert: true } }
-    // case 'OPEN_DELETE_ALERT':
-    //   return { ...state, delete: { ...state.delete, openAlert: true } }
+      return { ...state, delete: { ...state.delete, openDialog: false, rowData: null } }
+    case 'OPEN_DELETE_ALERT':
+      return { ...state, delete: { ...state.delete, openAlert: true } }
     case 'CLOSE_DELETE_ALERT':
       return { ...state, delete: { ...state.delete, openAlert: false } }
     default:
@@ -84,12 +83,6 @@ const reducerFunc = (state: InititalStateType, action: actionType) => {
 
 const UserTable = () => {
   const [modalAndAlertState, dispatch] = useReducer<Reducer<InititalStateType, actionType>>(reducerFunc, initialState)
-
-  // const [createModalOpen, setCreateModalOpen] = useState(false)
-  // const [editModalOpen, setEditModalOpen] = useState(false)
-  // const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  // const [editRowData, setEditRowData] = useState<User>({} as User)
-  // const [deleteRowData, setDeleteRowData] = useState<User>({} as User)
   const [pagination, setPagination] = useState<MRT_PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -107,12 +100,19 @@ const UserTable = () => {
     queryFn: async () => await UserService.getUsers(pagination.pageIndex, pagination.pageSize),
     keepPreviousData: true,
     retry: 2,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
   })
 
-  const { mutate: editAccount } = useMutation({
-    mutationKey: ['Edit User'],
-    mutationFn: async (user: User) => await UserService.createUser(user),
-  })
+  // const { data: dataUser } = useQuery<User, Error>({
+  //   queryKey: ['User'],
+  //   queryFn: async () => await UserService.getUser('60d0fe4f5311236168a109cc'),
+  // })
+
+  // const { mutate: editAccount } = useMutation({
+  //   mutationKey: ['Edit User'],
+  //   mutationFn: async (user: User) => await UserService.createUser(user),
+  // })
 
   useEffect(() => {
     refetchUsers()
@@ -126,13 +126,6 @@ const UserTable = () => {
     modalAndAlertState.edit.openAlert && dispatch({ type: 'CLOSE_EDIT_ALERT' })
     modalAndAlertState.delete.openAlert && dispatch({ type: 'CLOSE_DELETE_ALERT' })
   }
-
-  // const handleDeleteRow = (row: MRT_Row<User>) => {
-  //   if (!confirm(`Are you sure you want to delete ${row.getValue('firstName')}`)) {
-  //     return
-  //   }
-  //   deleteAccount(row.original.id)
-  // }
 
   const columns = useMemo<MRT_ColumnDef<User>[]>(
     () => [
@@ -264,7 +257,7 @@ const UserTable = () => {
         )}
         rowCount={data?.total}
         renderToolbarInternalActions={({ table }) => (
-          <>
+          <Fragment>
             <MRT_ToggleGlobalFilterButton table={table} />
             <MRT_ToggleDensePaddingButton table={table} />
             <MRT_FullScreenToggleButton table={table} />
@@ -277,7 +270,7 @@ const UserTable = () => {
             >
               <PrintIcon />
             </IconButton>
-          </>
+          </Fragment>
         )}
         state={{
           isLoading,
@@ -297,6 +290,7 @@ const UserTable = () => {
           modalAndAlertState.delete.openAlert ||
           modalAndAlertState.edit.openAlert
         }
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         autoHideDuration={6000}
         onClose={handleClose}
       >
