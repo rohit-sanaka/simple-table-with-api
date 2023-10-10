@@ -1,10 +1,12 @@
-import { useState } from 'react'
 import UserTable from './components/UserTable'
-// import NewAccountForm from './components/NewAccountForm'
+import DialogAndAlertProvider from './contexts/DialogAndAlertProvider'
 
 const App = () => {
-  
-  return <UserTable />
+  return (
+    <DialogAndAlertProvider>
+      <UserTable />
+    </DialogAndAlertProvider>
+  )
 }
 
 export default App

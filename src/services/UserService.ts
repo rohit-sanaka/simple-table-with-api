@@ -18,10 +18,6 @@ const getUser = async (id: string) => {
   return responce.data
 }
 
-// getUser('60d0fe4f5311236168a109cc').then(() => {
-//   console.log('done')
-// })
-
 const getUsers = async (page: number, limit: number) => {
   const responce = await apiClient.get<UserList>(`/user/?page=${page}&limit=${limit}`)
   return responce.data
@@ -33,12 +29,14 @@ const createUser = async (user: User) => {
 }
 
 const editUser = async (id: string, data: User) => {
+  console.log(data, 'data submitted to api')
   const responce = await apiClient.put<User>(`/user/${id}`, data)
   return responce.data
 }
 
 const deleteUser = async (id: string) => {
   const responce = await apiClient.delete<User>(`/user/${id}`)
+  console.log(responce)
   return responce
 }
 
@@ -48,7 +46,7 @@ const UserService = {
   createUser,
   editUser,
   deleteUser,
-  getUser
+  getUser,
 }
 
 export default UserService

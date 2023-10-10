@@ -5,10 +5,16 @@ import { TextField as MuiTextField, FormHelperText, FormControl } from '@mui/mat
 // import { useContext } from 'react'
 // import { ValidationContext } from '../components/NewAccountForm'
 
-const TextField = ({ name, label, required }: { name: string; label: string; required?: boolean }) => {
-  const {
-    control,
-  } = useFormContext()
+type TextFieldProps = {
+  name: string
+  label: string
+  required?: boolean
+  type?: 'text' | 'number'
+  helperText?: string
+}
+
+const TextField = ({ name, label, required, type, helperText = ' ' }: TextFieldProps) => {
+  const { control } = useFormContext()
 
   return (
     <Controller
@@ -19,6 +25,8 @@ const TextField = ({ name, label, required }: { name: string; label: string; req
           <FormControl fullWidth>
             <MuiTextField
               error={!!error}
+              type={type}
+              inputMode={type === 'text' ? 'text' : 'numeric'}
               onChange={onChange}
               required={required}
               value={value}
@@ -26,7 +34,7 @@ const TextField = ({ name, label, required }: { name: string; label: string; req
               fullWidth
               variant='outlined'
             />
-            <FormHelperText error={!!error}>{error ? error.message : ' '}</FormHelperText>
+            <FormHelperText error={!!error}>{error ? error.message : helperText}</FormHelperText>
           </FormControl>
         )
       }}

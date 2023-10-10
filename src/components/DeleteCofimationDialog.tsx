@@ -1,6 +1,6 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
-import { AxiosError } from 'axios'
-import { modalAndAlertStateContext } from './UserTable'
+import { AxiosError, AxiosResponse } from 'axios'
+import { dialogAndAlertContext } from '../contexts/DialogAndAlertProvider'
 import { useContext } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import UserService from '../services/UserService'
@@ -14,8 +14,8 @@ import CircularProgress from '@mui/material/CircularProgress'
 //   deleteAccount: UseMutateFunction<AxiosResponse, unknown, string, unknown>
 // }
 
-const DeleteCofimationModel = () => {
-  const { modalAndAlertState, dispatch } = useContext(modalAndAlertStateContext)
+const DeleteCofimationDialog = () => {
+  const { dialogAndAlertState, dispatch } = useContext(dialogAndAlertContext)
 
   const queryClient = useQueryClient()
 
@@ -23,22 +23,25 @@ const DeleteCofimationModel = () => {
     mutationKey: ['Delete User'],
     mutationFn: async (id: string) => await UserService.deleteUser(id),
     onSuccess: () => {
-      dispatch({ type: 'CLOSE_DELETE_DIALOG' })
-      dispatch({ type: 'OPEN_DELETE_ALERT' })
+      // dispatch({ type: 'CLOSE_DELETE_DIALOG' })
+      dispatch({ type: 'OPEN_ALERT', payload: { msg: `User deleted successfully`, type: 'success' } })
       queryClient.invalidateQueries(['Users'])
     },
-    onError: (error: AxiosError) => {
-      alert(error?.message)
+    onError: (error: AxiosError<AxiosResponse>) => {
+      dispatch({
+        type: 'OPEN_ALERT',
+        payload: { msg: 'Error while deleting user : ' + error?.response?.data?.data?.message, type: 'error' },
+      })
     },
   })
 
   return (
-    <Dialog open={modalAndAlertState.delete.openDialog} fullWidth maxWidth='xs'>
+    <Dialog open={dialogAndAlertState.delete.openDialog} fullWidth maxWidth='md'>
       <div className='px-2 py-5'>
         <DialogTitle sx={{ fontWeight: 'bold' }}>Confirm Action</DialogTitle>
         <DialogContent>
           Are you sure you want to delete{' '}
-          <span className='font-bold text-purple-700'>{`${modalAndAlertState?.delete?.rowData?.firstName} ${modalAndAlertState?.delete?.rowData?.lastName}`}</span>
+          <span className='font-bold text-purple-700'>{`${dialogAndAlertState?.delete?.rowData?.firstName} ${dialogAndAlertState?.delete?.rowData?.lastName}`}</span>
         </DialogContent>
         <DialogActions>
           <Button
@@ -55,8 +58,8 @@ const DeleteCofimationModel = () => {
               variant='contained'
               color='error'
               onClick={() => {
-                if (modalAndAlertState?.delete?.rowData) {
-                  deleteAccount(modalAndAlertState?.delete?.rowData?.id)
+                if (dialogAndAlertState?.delete?.rowData) {
+                  deleteAccount(dialogAndAlertState?.delete?.rowData?.id)
                 }
               }}
             >
@@ -81,4 +84,4 @@ const DeleteCofimationModel = () => {
     </Dialog>
   )
 }
-export default DeleteCofimationModel
+export default DeleteCofimationDialog

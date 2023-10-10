@@ -18,7 +18,7 @@ const Radio = ({
 
   const generateSingleOptions = () => {
     return options.map((option: { value: string; label: string }) => {
-      return <FormControlLabel key={option.value} value={option.value} control={<MuiRadio />} label={option.label} />
+      return <FormControlLabel key={option.label} value={option.value} control={<MuiRadio />} label={option.label } />
     })
   }
 
@@ -30,7 +30,12 @@ const Radio = ({
         return (
           <FormControl required={required} error={!!error} fullWidth>
             <FormLabel id={label}>{label}</FormLabel>
-            <RadioGroup aria-labelledby={label} name={name} value={value} onChange={onChange} row={direction === 'row'}>
+            <RadioGroup
+              aria-labelledby={label}
+              value={value ? value : ' '}
+              onChange={onChange}
+              row={direction === 'row'}
+            >
               {generateSingleOptions()}
             </RadioGroup>
             <FormHelperText>{error ? error.message : ' '}</FormHelperText>

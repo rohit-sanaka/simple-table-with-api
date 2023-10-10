@@ -5,15 +5,15 @@ import { Box, Button, Grid, CircularProgress } from '@mui/material'
 import { User } from '../types/User'
 import TextField from '../RHF_Input_Templets/RHF_TextField'
 import { dialogAndAlertContext } from '../contexts/DialogAndAlertProvider'
-import { useContext } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useContext, useEffect } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import UserService from '../services/UserService'
 import { AxiosError, AxiosResponse } from 'axios'
 import { FormControl, FormLabel } from '@mui/material'
 import Select from '../RHF_Input_Templets/RHF_SelectField'
 import Radio from '../RHF_Input_Templets/RHF_RadioGroup'
 import DatePicker from '../RHF_Input_Templets/RHF_DatePicker'
-import timezones from '../utils/timezoneObject'
+import timezonesArray from '../utils/timezoneObject'
 
 const titleOptinos = [
   { value: '', label: '--None--' },
@@ -29,6 +29,8 @@ const genderOptions = [
   { value: 'female', label: 'Female' },
   { value: 'other', label: 'Other' },
 ]
+
+const timezones = timezonesArray
 
 const schema: yup.AnyObjectSchema = yup.object().shape({
   title: yup.string().required('Title is required'),
@@ -48,7 +50,7 @@ const schema: yup.AnyObjectSchema = yup.object().shape({
   phone: yup
     .string()
     .required('Phone Number is required')
-    .matches(/^[0-9]+/, 'Invalid phone number'),
+    .matches(/^[0-9]+$/, 'Invalid phone number'),
   picture: yup.string(),
   location: yup.object().shape({
     street: yup.string(),
@@ -59,42 +61,65 @@ const schema: yup.AnyObjectSchema = yup.object().shape({
   }),
 })
 
-const CreateAccountForm = () => {
+const EditAccountForm = () => {
+  const { dialogAndAlertState, dispatch } = useContext(dialogAndAlertContext)
   const queryClient = useQueryClient()
-  const { dispatch } = useContext(dialogAndAlertContext)
+
+  const defaultValues: User = {
+    id: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    dateOfBirth: new Date(),
+    phone: '',
+    picture: '',
+    location: {
+      street: '',
+      city: '',
+      state: '',
+      country: '',
+      timezone: '',
+    },
+    ...dialogAndAlertState?.edit?.rowData,
+  }
+
+  const {
+    data,
+    isLoading: isLoadingUser,
+    isFetching: isFetchingUser,
+    isError: isErrorFetchingUser,
+    error,
+  } = useQuery<User, AxiosError<AxiosResponse> | Error>({
+    queryKey: ['User', dialogAndAlertState?.edit?.rowData?.id],
+    queryFn: async () => await UserService.getUser(dialogAndAlertState?.edit?.rowData?.id ?? ' '),
+    retry: 2,
+    refetchOnWindowFocus: false,
+  })
+  
+  useEffect(() => {
+    if (isErrorFetchingUser) {
+      dispatch({
+        type: 'OPEN_ALERT',
+        payload: { msg: `Error while fetching user `, type: 'error' },
+      })
+    }
+  }, [isErrorFetchingUser])
 
   const methods = useForm({
     resolver: yupResolver(schema),
+    defaultValues: defaultValues,
     reValidateMode: 'onChange',
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      dateOfBirth: null,
-      phone: '',
-      title: '',
-      gender: '',
-      picture: '',
-      location: {
-        street: '',
-        city: '',
-        state: '',
-        country: '',
-        timezone: '',
-      },
-    },
+    values: data,
   })
 
-  const { mutate: createAccount, isLoading } = useMutation({
-    mutationKey: ['create User'],
-    mutationFn: async (user: User) => await UserService.createUser(user),
-
+  const { mutate: editAccount, isLoading } = useMutation({
+    mutationKey: ['Edit User', dialogAndAlertState?.edit?.rowData?.id],
+    mutationFn: async (user: User) => await UserService.editUser(dialogAndAlertState?.edit?.rowData?.id ?? ' ', user),
     onSuccess: () => {
       queryClient.invalidateQueries(['Users'])
-      dispatch({ type: 'CLOSE_CREATE_DIALOG' })
-      dispatch({ type: 'OPEN_ALERT', payload: { msg: 'Account created successfully', type: 'success' } })
+      dispatch({ type: 'OPEN_ALERT', payload: { msg: `User updated successfully`, type: 'success' } })
+      dispatch({ type: 'CLOSE_EDIT_DIALOG' })
     },
-
     onError: (error: AxiosError<AxiosResponse>) => {
       if (error?.response) {
         const serverErrors = error?.response?.data?.data
@@ -105,21 +130,28 @@ const CreateAccountForm = () => {
           })
         }
       }
-      dispatch({ type: 'OPEN_ALERT', payload: { msg: 'Please input valid data', type: 'error' } })
+      dispatch({
+        type: 'OPEN_ALERT',
+        payload: { msg: `Error while updating user : ${error?.response?.data?.data?.message}`, type: 'success' },
+      })
     },
   })
 
-  console.log(queryClient.getQueryData(['Users']))
   const onSubmit = (data: User) => {
     if (!isLoading) {
-      createAccount(data)
+      editAccount(data)
     }
   }
 
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} noValidate autoComplete='off' className='px-2 py-5'>
-        <Grid container spacing={2}>
+        <Grid
+          container
+          spacing={2}
+          sx={{ position: 'relative' }}
+          className={`${isLoadingUser || isFetchingUser ? 'bg-gray-200 opacity-80' : ''}`}
+        >
           <Grid item xs={2}>
             <Select name='title' label='Title' required={true} options={titleOptinos} />
           </Grid>
@@ -148,9 +180,6 @@ const CreateAccountForm = () => {
             <FormControl fullWidth>
               <FormLabel>Location</FormLabel>
               <Grid container spacing={1} direction='row'>
-                {/* <Grid item xs={2}>
-                <Typography variant='h6'>Address : </Typography>
-              </Grid> */}
                 <Grid item xs={3}>
                   <TextField name='location.street' label='Street' />
                 </Grid>
@@ -172,7 +201,7 @@ const CreateAccountForm = () => {
           <Grid item xs={12}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'end', gap: 2 }}>
               <Button
-                onClick={() => dispatch({ type: 'CLOSE_CREATE_DIALOG' })}
+                onClick={() => dispatch({ type: 'CLOSE_EDIT_DIALOG' })}
                 type='reset'
                 color='secondary'
                 variant='contained'
@@ -198,10 +227,22 @@ const CreateAccountForm = () => {
               </Box>
             </Box>
           </Grid>
+          {(isLoadingUser || isFetchingUser) && (
+            <CircularProgress
+              size={50}
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                marginTop: '-12px',
+                marginLeft: '-12px',
+              }}
+            />
+          )}
         </Grid>
       </form>
     </FormProvider>
   )
 }
 
-export default CreateAccountForm
+export default EditAccountForm

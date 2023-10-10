@@ -21,7 +21,7 @@ const Select = ({
   const generateSingleOptions = () => {
     return options.map((option: { value: string; label: string }) => {
       return (
-        <MenuItem key={option.value} value={option.value}>
+        <MenuItem key={option.label} value={option.value}>
           {option.label}
         </MenuItem>
       )
