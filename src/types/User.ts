@@ -6,11 +6,11 @@ export type User = {
   gender?: 'male' | 'female' | 'other'
   email: string
   picture?: string
-  dateOfBirth?:  Date;
-  phone?:        string;
-  location?:     Location;
-  registerDate?: Date;
-  updatedDate?:  Date;
+  dateOfBirth?: Date
+  phone?: string
+  location?: Location
+  registerDate?: Date
+  updatedDate?: Date
 }
 
 export type UserList = {
@@ -21,10 +21,9 @@ export type UserList = {
 }
 
 export type Location = {
-  street?:   string;
-  city?:     string;
-  state?:    string;
-  country?:  string;
-  timezone?: string;
+  street?: string
+  city?: string
+  state?: string
+  country?: string
+  timezone?: string
 }
-

@@ -18,7 +18,7 @@ const Radio = ({
 
   const generateSingleOptions = () => {
     return options.map((option: { value: string; label: string }) => {
-      return <FormControlLabel key={option.label} value={option.value} control={<MuiRadio />} label={option.label } />
+      return <FormControlLabel key={option.label} value={option.value} control={<MuiRadio />} label={option.label} />
     })
   }
 
