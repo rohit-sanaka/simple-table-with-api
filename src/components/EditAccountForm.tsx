@@ -88,14 +88,13 @@ const EditAccountForm = () => {
     isLoading: isLoadingUser,
     isFetching: isFetchingUser,
     isError: isErrorFetchingUser,
-    error,
   } = useQuery<User, AxiosError<AxiosResponse> | Error>({
     queryKey: ['User', dialogAndAlertState?.edit?.rowData?.id],
     queryFn: async () => await UserService.getUser(dialogAndAlertState?.edit?.rowData?.id ?? ' '),
     retry: 2,
     refetchOnWindowFocus: false,
   })
-  
+
   useEffect(() => {
     if (isErrorFetchingUser) {
       dispatch({
