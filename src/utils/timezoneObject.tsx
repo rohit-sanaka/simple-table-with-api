@@ -1,5 +1,9 @@
 const timezones = [
   {
+    label: '--None--',
+    value: '',
+  },
+  {
     value: '-11:00',
     label: 'Pacific/Midway',
   },

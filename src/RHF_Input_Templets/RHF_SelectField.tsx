@@ -20,11 +20,6 @@ const Select = ({
         <MenuItem
           key={option.label}
           value={option.value}
-          // sx={{
-          //   MuiInput: {
-          //     padding: 0,
-          //   },
-          // }}
         >
           {option.label}
         </MenuItem>

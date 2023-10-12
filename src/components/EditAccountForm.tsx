@@ -172,7 +172,7 @@ const EditAccountForm = () => {
           <Grid item xs={6}>
             <TextField name='picture' label='Picture' helperText='Please provide picture url' />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} spacing={3}>
             <FormControl fullWidth>
               <FormLabel sx={{ mb: 1 }}>Location</FormLabel>
               <Grid container spacing={1} direction='row'>
