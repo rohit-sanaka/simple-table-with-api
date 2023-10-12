@@ -14,7 +14,6 @@ const getAllUsers = async () => {
 }
 const getUser = async (id: string) => {
   const responce = await apiClient.get<User>(`/user/${id}`)
-  console.log(responce.data)
   return responce.data
 }
 
@@ -29,14 +28,12 @@ const createUser = async (user: User) => {
 }
 
 const editUser = async (id: string, data: User) => {
-  console.log(data, 'data submitted to api')
   const responce = await apiClient.put<User>(`/user/${id}`, data)
   return responce.data
 }
 
 const deleteUser = async (id: string) => {
   const responce = await apiClient.delete<User>(`/user/${id}`)
-  console.log(responce)
   return responce
 }
 

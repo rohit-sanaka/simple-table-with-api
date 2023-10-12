@@ -14,6 +14,7 @@ import Select from '../RHF_Input_Templets/RHF_SelectField'
 import Radio from '../RHF_Input_Templets/RHF_RadioGroup'
 import DatePicker from '../RHF_Input_Templets/RHF_DatePicker'
 import timezones from '../utils/timezoneObject'
+import AutoComplete from '../RHF_Input_Templets/RHF_AutoComplete'
 
 const titleOptinos = [
   { value: '', label: '--None--' },
@@ -52,7 +53,13 @@ const schema: yup.AnyObjectSchema = yup.object().shape({
     city: yup.string(),
     state: yup.string(),
     country: yup.string(),
-    timezone: yup.string(),
+    timezone: yup
+      .string()
+      .nullable()
+      .oneOf(
+        timezones.map((tz) => tz.value),
+        'Invalid Timezone'
+      ),
   }),
 })
 
@@ -139,7 +146,7 @@ const CreateAccountForm = () => {
           <Grid item xs={6}>
             <TextField name='picture' label='Picture' helperText='Please provide picture url' />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} spacing={3}>
             <FormControl fullWidth>
               <FormLabel sx={{ mb: 1 }}>Location</FormLabel>
               <Grid container spacing={1} direction='row'>
@@ -155,8 +162,11 @@ const CreateAccountForm = () => {
                 <Grid item xs={4}>
                   <TextField name='location.country' label='country' />
                 </Grid>
-                <Grid item xs={4}>
+                {/* <Grid item xs={4}>
                   <Select name='location.timezone' label='Timezone' options={timezones} />
+                </Grid> */}
+                <Grid item xs={4}>
+                  <AutoComplete name='location.timezone' label='Timezone' options={timezones} />
                 </Grid>
               </Grid>
             </FormControl>

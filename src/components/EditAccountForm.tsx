@@ -14,6 +14,7 @@ import Select from '../RHF_Input_Templets/RHF_SelectField'
 import Radio from '../RHF_Input_Templets/RHF_RadioGroup'
 import DatePicker from '../RHF_Input_Templets/RHF_DatePicker'
 import timezonesArray from '../utils/timezoneObject'
+import AutoComplete from '../RHF_Input_Templets/RHF_AutoComplete'
 
 const titleOptinos = [
   { value: '', label: '--None--' },
@@ -188,8 +189,11 @@ const EditAccountForm = () => {
                 <Grid item xs={4}>
                   <TextField name='location.country' label='country' />
                 </Grid>
-                <Grid item xs={4}>
+                {/* <Grid item xs={4}>
                   <Select name='location.timezone' label='Timezone' options={timezones} />
+                </Grid> */}
+                <Grid item xs={4}>
+                  <AutoComplete name='location.timezone' label='Timezone' options={timezones} />
                 </Grid>
               </Grid>
             </FormControl>
