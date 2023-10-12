@@ -14,11 +14,11 @@ const CreateNewAccountDialog = () => {
   }
 
   return (
-    <Dialog open={dialogAndAlertState.create.openDialog} onClose={handleClose} sx={{ m: 2 }} fullWidth maxWidth='md'>
-      <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', fontFamily: 'sans-serif' }}>
+    <Dialog open={dialogAndAlertState.create.openDialog} onClose={handleClose} fullWidth maxWidth='md'>
+      <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', fontFamily: 'sans-serif', pt:5 }}>
         Please enter user detiails
       </DialogTitle>
-      <DialogContent sx={{ p: 2 }}>
+      <DialogContent sx={{ px: 5, py: 2 }}>
         <CreateAccountForm />
       </DialogContent>
     </Dialog>

@@ -14,24 +14,30 @@ const DatePicker = ({ name, label, required }: { name: string; label: string; re
       name={name}
       control={control}
       render={({ field: { onChange, value }, fieldState: { error } }) => {
-        console.log(value, 'data picker field')
+        value = typeof value === 'string' ? parseISO(value) : value
         return (
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <Fragment>
+          <Fragment>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
               <MuiDatePicker
                 label={label}
-                value={parseISO(value)}
+                value={value}
                 onChange={onChange}
-                onAccept={onChange}
                 disableFuture
                 format='dd/MM/yyyy'
-                slotProps={{ textField: { required: required, fullWidth: true, error: !!error } }}
+                formatDensity='dense'
+                slotProps={{
+                  textField: {
+                    label: label,
+                    required: required,
+                    fullWidth: true,
+                    error: !!error,
+                    variant: 'standard',
+                  },
+                }}
               />
-              <FormHelperText sx={{ pl: 2 }} error={!!error}>
-                {error ? error.message : ' '}
-              </FormHelperText>
-            </Fragment>
-          </LocalizationProvider>
+            </LocalizationProvider>
+            <FormHelperText error={!!error}>{error ? error.message : ' '}</FormHelperText>
+          </Fragment>
         )
       }}
     />

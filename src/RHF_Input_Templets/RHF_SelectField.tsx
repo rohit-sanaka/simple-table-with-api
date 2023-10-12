@@ -17,7 +17,15 @@ const Select = ({
   const generateSingleOptions = () => {
     return options.map((option: { value: string; label: string }) => {
       return (
-        <MenuItem key={option.label} value={option.value}>
+        <MenuItem
+          key={option.label}
+          value={option.value}
+          // sx={{
+          //   MuiInput: {
+          //     padding: 0,
+          //   },
+          // }}
+        >
           {option.label}
         </MenuItem>
       )
@@ -32,8 +40,17 @@ const Select = ({
       render={({ field: { onChange, value }, fieldState: { error } }) => {
         return (
           <FormControl required={required} error={!!error} fullWidth>
-            <InputLabel id={label}>{label}</InputLabel>
-            <MuiSelect id={label} onChange={onChange} value={value} label={label} variant='outlined'>
+            <InputLabel id={label} sx={{ pt: 0.5 }}>
+              {label}
+            </InputLabel>
+            <MuiSelect
+              id={label}
+              onChange={onChange}
+              value={value}
+              label={label}
+              variant='standard'
+              fullWidth
+            >
               {generateSingleOptions()}
             </MuiSelect>
             <FormHelperText>{error ? error.message : ' '}</FormHelperText>

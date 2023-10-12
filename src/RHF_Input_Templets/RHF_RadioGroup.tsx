@@ -35,6 +35,10 @@ const Radio = ({
               value={value ? value : ' '}
               onChange={onChange}
               row={direction === 'row'}
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
             >
               {generateSingleOptions()}
             </RadioGroup>

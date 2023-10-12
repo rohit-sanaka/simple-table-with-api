@@ -7,5 +7,33 @@ export const formLabelsTheme = createTheme({
         asterisk: { color: 'red' },
       },
     },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: 'grey',
+          fontFamily: 'Roboto',
+          fontWeight: 400,
+          fontSize: '1.2rem',
+        },
+      },
+    },
+    MuiInputBase: {
+      styleOverrides: {
+        input: {
+          color: 'black',
+          fontFamily: 'Monospace',
+          fontWeight: 400,
+          fontSize: '1.2rem',
+        },
+      },
+    },
+    MuiFormHelperText: {
+      styleOverrides: {
+        root: {
+          padding: 0,
+          margin: 0,
+        },
+      },
+    },
   },
 })

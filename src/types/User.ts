@@ -6,7 +6,7 @@ export type User = {
   gender?: 'male' | 'female' | 'other'
   email: string
   picture?: string
-  dateOfBirth?: Date
+  dateOfBirth?: Date | null
   phone?: string
   location?: Location
   registerDate?: Date

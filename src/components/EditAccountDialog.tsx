@@ -14,9 +14,11 @@ const EditAccountDialog = () => {
   }
 
   return (
-    <Dialog open={dialogAndAlertState.edit.openDialog} onClose={handleClose} sx={{ m: 2 }} fullWidth maxWidth='md'>
-      <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', fontFamily: 'sans-serif' }}>User Details</DialogTitle>
-      <DialogContent sx={{ p: 1 }}>
+    <Dialog open={dialogAndAlertState.edit.openDialog} onClose={handleClose} fullWidth maxWidth='md'>
+      <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', fontFamily: 'sans-serif', pt: 5 }}>
+        User Details
+      </DialogTitle>
+      <DialogContent sx={{ px: 5, py: 2 }}>
         <EditAccountForm />
       </DialogContent>
     </Dialog>

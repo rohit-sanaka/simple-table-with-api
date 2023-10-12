@@ -32,7 +32,6 @@ const genderOptions = [
 
 const schema: yup.AnyObjectSchema = yup.object().shape({
   title: yup.string().required('Title is required'),
-  gender: yup.string().required('Title is required'),
   firstName: yup
     .string()
     .required('Fisrt Name is required')
@@ -45,11 +44,9 @@ const schema: yup.AnyObjectSchema = yup.object().shape({
     .max(50, 'Last Name can be at most 50 characters'),
   email: yup.string().required('Email is required').email('Invalid email'),
   dateOfBirth: yup.date().required('Date of Birth is required'),
-  phone: yup
-    .string()
-    .required('Phone Number is required')
-    .matches(/^[0-9]+/, 'Invalid phone number'),
+  phone: yup.string().required('Phone Number is required'),
   picture: yup.string(),
+  gender: yup.string().required('Gender is required'),
   location: yup.object().shape({
     street: yup.string(),
     city: yup.string(),
@@ -108,8 +105,6 @@ const CreateAccountForm = () => {
       dispatch({ type: 'OPEN_ALERT', payload: { msg: 'Please input valid data', type: 'error' } })
     },
   })
-
-  console.log(queryClient.getQueryData(['Users']))
   const onSubmit = (data: User) => {
     if (!isLoading) {
       createAccount(data)
@@ -119,51 +114,48 @@ const CreateAccountForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} noValidate autoComplete='off' className='px-2 py-5'>
-        <Grid container spacing={2}>
-          <Grid item xs={2}>
+        <Grid container columnSpacing={3} rowSpacing={3}>
+          <Grid item xs={4}>
             <Select name='title' label='Title' required={true} options={titleOptinos} />
           </Grid>
-          <Grid item xs={5}>
+          <Grid item xs={4}>
             <TextField name='firstName' label='First Name' required={true} />
           </Grid>
-          <Grid item xs={5}>
+          <Grid item xs={4}>
             <TextField name='lastName' label='Last Name' required={true} />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={5}>
             <TextField name='email' label='Email' required={true} />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={3}>
             <TextField name='phone' label='Phone Number' required={true} />
-          </Grid>
-          <Grid item xs={4}>
-            <Radio name='gender' label='Gender' required={true} options={genderOptions} direction='row' />
           </Grid>
           <Grid item xs={4}>
             <DatePicker name='dateOfBirth' label='Date of Birth' required={true} />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6}>
+            <Radio name='gender' label='Gender' required={true} options={genderOptions} direction='row' />
+          </Grid>
+          <Grid item xs={6}>
             <TextField name='picture' label='Picture' helperText='Please provide picture url' />
           </Grid>
           <Grid item xs={12}>
             <FormControl fullWidth>
-              <FormLabel>Location</FormLabel>
+              <FormLabel sx={{ mb: 1 }}>Location</FormLabel>
               <Grid container spacing={1} direction='row'>
-                {/* <Grid item xs={2}>
-                <Typography variant='h6'>Address : </Typography>
-              </Grid> */}
-                <Grid item xs={3}>
+                <Grid item xs={4}>
                   <TextField name='location.street' label='Street' />
                 </Grid>
-                <Grid item xs={3}>
+                <Grid item xs={4}>
                   <TextField name='location.city' label='City' />
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={4}>
                   <TextField name='location.state' label='State' />
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={4}>
                   <TextField name='location.country' label='country' />
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={4}>
                   <Select name='location.timezone' label='Timezone' options={timezones} />
                 </Grid>
               </Grid>

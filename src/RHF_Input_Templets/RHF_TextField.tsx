@@ -32,7 +32,7 @@ const TextField = ({ name, label, required, type, helperText = ' ' }: TextFieldP
               value={value}
               label={label}
               fullWidth
-              variant='outlined'
+              variant='standard'
             />
             <FormHelperText error={!!error}>{error ? error.message : helperText}</FormHelperText>
           </FormControl>
