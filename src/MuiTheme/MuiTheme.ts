@@ -22,7 +22,7 @@ export const formLabelsTheme = createTheme({
         input: {
           color: 'black',
           fontFamily: 'Monospace',
-          fontWeight: 400,
+          fontWeight: 200,
           fontSize: '1.2rem',
         },
       },

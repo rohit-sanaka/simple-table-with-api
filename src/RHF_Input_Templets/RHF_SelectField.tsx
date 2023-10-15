@@ -1,5 +1,5 @@
 import { Controller, useFormContext } from 'react-hook-form'
-import { FormControl, FormHelperText, InputLabel, MenuItem, Select as MuiSelect } from '@mui/material'
+import { FormControl, FormHelperText, TextField, InputLabel, MenuItem } from '@mui/material'
 
 const Select = ({
   name,
@@ -17,10 +17,7 @@ const Select = ({
   const generateSingleOptions = () => {
     return options.map((option: { value: string; label: string }) => {
       return (
-        <MenuItem
-          key={option.label}
-          value={option.value}
-        >
+        <MenuItem key={option.label} value={option.value}>
           {option.label}
         </MenuItem>
       )
@@ -35,11 +32,9 @@ const Select = ({
       render={({ field: { onChange, value }, fieldState: { error } }) => {
         return (
           <FormControl required={required} error={!!error} fullWidth>
-            <InputLabel id={label} sx={{ pt: 0.5 }}>
-              {label}
-            </InputLabel>
-            <MuiSelect
-              id={label}
+            {/* <InputLabel id={label}>{label}</InputLabel> */}
+            <TextField
+              select
               onChange={onChange}
               value={value}
               label={label}
@@ -47,7 +42,7 @@ const Select = ({
               fullWidth
             >
               {generateSingleOptions()}
-            </MuiSelect>
+            </TextField>
             <FormHelperText>{error ? error.message : ' '}</FormHelperText>
           </FormControl>
         )

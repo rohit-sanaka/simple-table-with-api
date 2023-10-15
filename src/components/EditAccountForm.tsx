@@ -146,6 +146,7 @@ const EditAccountForm = () => {
         <Grid
           container
           spacing={3}
+          rowSpacing={1}
           sx={{ position: 'relative' }}
           className={`${isLoadingUser || isFetchingUser ? 'bg-gray-200 opacity-80' : ''}`}
         >
@@ -173,10 +174,10 @@ const EditAccountForm = () => {
           <Grid item xs={6}>
             <TextField name='picture' label='Picture' helperText='Please provide picture url' />
           </Grid>
-          <Grid item xs={12} spacing={3}>
+          <Grid item xs={12}>
             <FormControl fullWidth>
               <FormLabel sx={{ mb: 1 }}>Location</FormLabel>
-              <Grid container spacing={1} direction='row'>
+              <Grid container spacing={3} rowSpacing={1} direction='row'>
                 <Grid item xs={4}>
                   <TextField name='location.street' label='Street' />
                 </Grid>
@@ -189,9 +190,6 @@ const EditAccountForm = () => {
                 <Grid item xs={4}>
                   <TextField name='location.country' label='country' />
                 </Grid>
-                {/* <Grid item xs={4}>
-                  <Select name='location.timezone' label='Timezone' options={timezones} />
-                </Grid> */}
                 <Grid item xs={4}>
                   <AutoComplete name='location.timezone' label='Timezone' options={timezones} />
                 </Grid>

@@ -2,27 +2,17 @@ import { useQuery } from '@tanstack/react-query'
 import UserService from '../services/UserService'
 import { User, UserList } from '../types/User'
 import { useState, useMemo, useEffect, Fragment, useContext } from 'react'
-import {
-  MaterialReactTable,
-  MRT_PaginationState,
-  MRT_ColumnDef,
-  MRT_FullScreenToggleButton,
-  MRT_ToggleDensePaddingButton,
-  MRT_ShowHideColumnsButton,
-  MRT_ToggleFiltersButton,
-  MRT_ToggleGlobalFilterButton,
-} from 'material-react-table'
-import { IconButton, Tooltip, Box, Snackbar, Alert } from '@mui/material'
+import { MaterialReactTable, MRT_PaginationState, MRT_ColumnDef } from 'material-react-table'
+import { IconButton, Tooltip, Box, Snackbar, Alert, ThemeProvider } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import PrintIcon from '@mui/icons-material/Print'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-// import { InititalStateType, actionType } from '../types/UserTable'
 import CreateNewAccountDialog from './CreateNewAccountDialog'
 import EditAccountDialog from './EditAccountDialog'
 import DeleteCofimationDialog from './DeleteCofimationDialog'
 import { dialogAndAlertContext } from '../contexts/DialogAndAlertProvider'
+import { formLabelsTheme } from '../MuiTheme/MuiTheme'
 
 const UserTable = () => {
   const [pagination, setPagination] = useState<MRT_PaginationState>({
@@ -49,7 +39,7 @@ const UserTable = () => {
 
   useEffect(() => {
     refetchUsers()
-  }, [pagination])
+  }, [pagination, refetchUsers])
 
   const handleClose = (_event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
@@ -149,7 +139,7 @@ const UserTable = () => {
                 }}
                 title='Edit'
               >
-                <EditIcon color='warning' />
+                <EditIcon color='secondary' />
               </IconButton>
               <IconButton
                 onClick={() => {
@@ -172,7 +162,7 @@ const UserTable = () => {
             : undefined
         }
         onPaginationChange={setPagination}
-        renderTopToolbarCustomActions={() => (
+        renderTopToolbarCustomActions={({ table }) => (
           <div className='flex items-center justify-start'>
             <Tooltip arrow title='Refresh Data'>
               <IconButton onClick={() => refetchUsers()}>
@@ -184,25 +174,19 @@ const UserTable = () => {
                 <AddIcon />
               </IconButton>
             </Tooltip>
+            <Tooltip arrow title='Delete Selected'>
+              <IconButton
+                disabled={!(table.getIsSomeRowsSelected() || table.getIsAllRowsSelected())}
+                onClick={() => console.log(table.getSelectedRowModel())}
+              >
+                <DeleteIcon
+                  color={`${table.getIsSomeRowsSelected() || table.getIsAllRowsSelected() ? 'error' : 'disabled'}`}
+                />
+              </IconButton>
+            </Tooltip>
           </div>
         )}
         rowCount={data?.total}
-        renderToolbarInternalActions={({ table }) => (
-          <Fragment>
-            <MRT_ToggleGlobalFilterButton table={table} />
-            <MRT_ToggleDensePaddingButton table={table} />
-            <MRT_FullScreenToggleButton table={table} />
-            <MRT_ShowHideColumnsButton table={table} />
-            <MRT_ToggleFiltersButton table={table} />
-            <IconButton
-              onClick={() => {
-                window.print()
-              }}
-            >
-              <PrintIcon />
-            </IconButton>
-          </Fragment>
-        )}
         state={{
           isLoading,
           pagination,
@@ -210,9 +194,11 @@ const UserTable = () => {
           showProgressBars: isFetching || isLoading,
         }}
       />
-      <CreateNewAccountDialog />
-      <DeleteCofimationDialog />
-      <EditAccountDialog />
+      <ThemeProvider theme={formLabelsTheme}>
+        <CreateNewAccountDialog />
+        <DeleteCofimationDialog />
+        <EditAccountDialog />
+      </ThemeProvider>
 
       <Snackbar
         open={dialogAndAlertState.alert.openAlert}

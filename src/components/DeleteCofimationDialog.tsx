@@ -7,23 +7,15 @@ import UserService from '../services/UserService'
 import { Box } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 
-// type DeleteCofimationModelProps = {
-//   open: boolean
-//   setOpen: React.Dispatch<React.SetStateAction<boolean>>
-//   user: User
-//   deleteAccount: UseMutateFunction<AxiosResponse, unknown, string, unknown>
-// }
-
 const DeleteCofimationDialog = () => {
   const { dialogAndAlertState, dispatch } = useContext(dialogAndAlertContext)
 
   const queryClient = useQueryClient()
 
   const { mutate: deleteAccount, isLoading } = useMutation({
-    mutationKey: ['Delete User'],
+    mutationKey: ['Delete User', dialogAndAlertState?.delete?.rowData?.id],
     mutationFn: async (id: string) => await UserService.deleteUser(id),
     onSuccess: () => {
-      // dispatch({ type: 'CLOSE_DELETE_DIALOG' })
       dispatch({ type: 'OPEN_ALERT', payload: { msg: `User deleted successfully`, type: 'success' } })
       queryClient.invalidateQueries(['Users'])
     },

@@ -1,9 +1,5 @@
 import { Controller, useFormContext } from 'react-hook-form'
-import { TextField, FormHelperText, FormControl, Autocomplete as MuiAutoComplete } from '@mui/material'
-
-// import { AnyObject } from 'yup'
-// import { useContext } from 'react'
-// import { ValidationContext } from '../components/NewAccountForm'
+import { TextField, FormHelperText, FormControl, Box, Autocomplete as MuiAutoComplete } from '@mui/material'
 
 type TextFieldProps = {
   name: string
@@ -25,6 +21,10 @@ const AutoComplete = ({ name, label, required, options, helperText = ' ' }: Text
           <FormControl fullWidth>
             <MuiAutoComplete
               value={value}
+              renderOption={(props, option) => {
+                console.log(option)
+                return <Box component='li' {...props}>{`${option.label} : ( ${option.value} )`}</Box>
+              }}
               isOptionEqualToValue={(option, value) => {
                 return option.value === value
               }}
@@ -32,8 +32,7 @@ const AutoComplete = ({ name, label, required, options, helperText = ' ' }: Text
                 onChange(newValue?.value)
               }}
               options={options}
-              sx={{ width: 300 }}
-              fullWidth
+              fullWidth              
               renderInput={(params) => (
                 <TextField
                   {...params}

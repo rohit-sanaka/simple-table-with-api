@@ -69,7 +69,6 @@ const CreateAccountForm = () => {
 
   const methods = useForm({
     resolver: yupResolver(schema),
-    reValidateMode: 'onChange',
     defaultValues: {
       firstName: '',
       lastName: '',
@@ -121,7 +120,7 @@ const CreateAccountForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} noValidate autoComplete='off' className='px-2 py-5'>
-        <Grid container columnSpacing={3} rowSpacing={3}>
+        <Grid container spacing={3} rowSpacing={1}>
           <Grid item xs={4}>
             <Select name='title' label='Title' required={true} options={titleOptinos} />
           </Grid>
@@ -146,10 +145,10 @@ const CreateAccountForm = () => {
           <Grid item xs={6}>
             <TextField name='picture' label='Picture' helperText='Please provide picture url' />
           </Grid>
-          <Grid item xs={12} spacing={3}>
+          <Grid item xs={12}>
             <FormControl fullWidth>
               <FormLabel sx={{ mb: 1 }}>Location</FormLabel>
-              <Grid container spacing={1} direction='row'>
+              <Grid container spacing={3} rowSpacing={1} direction='row'>
                 <Grid item xs={4}>
                   <TextField name='location.street' label='Street' />
                 </Grid>
@@ -160,13 +159,10 @@ const CreateAccountForm = () => {
                   <TextField name='location.state' label='State' />
                 </Grid>
                 <Grid item xs={4}>
-                  <TextField name='location.country' label='country' />
-                </Grid>
-                {/* <Grid item xs={4}>
-                  <Select name='location.timezone' label='Timezone' options={timezones} />
-                </Grid> */}
-                <Grid item xs={4}>
                   <AutoComplete name='location.timezone' label='Timezone' options={timezones} />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField name='location.country' label='country' />
                 </Grid>
               </Grid>
             </FormControl>

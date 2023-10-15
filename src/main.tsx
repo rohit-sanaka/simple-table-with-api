@@ -4,8 +4,6 @@ import App from './App.tsx'
 import './index.css'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { formLabelsTheme } from './MuiTheme/MuiTheme.ts'
-import { ThemeProvider } from '@mui/material'
 const queryClient = new QueryClient()
 //   {
 //   defaultOptions: {
@@ -22,9 +20,7 @@ const queryClient = new QueryClient()
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={formLabelsTheme}>
         <App />
-      </ThemeProvider>
       <ReactQueryDevtools position='bottom-left' />
     </QueryClientProvider>
   </React.StrictMode>
