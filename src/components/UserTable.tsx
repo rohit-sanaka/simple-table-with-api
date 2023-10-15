@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import UserService from '../services/UserService'
 import { User, UserList } from '../types/User'
-import { useState, useMemo, useEffect, Fragment, useContext } from 'react'
+import { useState, useMemo, Fragment, useContext } from 'react'
 import { MaterialReactTable, MRT_PaginationState, MRT_ColumnDef } from 'material-react-table'
 import { IconButton, Tooltip, Box, Snackbar, Alert, ThemeProvider } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
@@ -30,16 +30,12 @@ const UserTable = () => {
     isError,
     refetch: refetchUsers,
   } = useQuery<UserList, Error>({
-    queryKey: ['Users'],
+    queryKey: ['Users', pagination],
     queryFn: async () => await UserService.getUsers(pagination.pageIndex, pagination.pageSize),
     keepPreviousData: true,
     retry: 2,
     refetchOnWindowFocus: false,
   })
-
-  useEffect(() => {
-    refetchUsers()
-  }, [pagination, refetchUsers])
 
   const handleClose = (_event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
@@ -53,15 +49,15 @@ const UserTable = () => {
       {
         accessorKey: 'picture',
         header: 'Picture',
-        size: 70,
+        size: 100,
         enableSorting: false,
         enableColumnFilter: false,
         Cell: ({ row }) => (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'start' }}>
             <img
               alt='avatar'
-              height={30}
-              width={30}
+              height='20%'
+              width='20%'
               src={row.original.picture || 'https://mui.com/static/images/avatar/6.jpg'}
               loading='lazy'
               style={{ borderRadius: '50%' }}
@@ -72,22 +68,18 @@ const UserTable = () => {
       {
         accessorKey: 'title',
         header: 'Title',
-        size: 50,
       },
       {
         accessorKey: 'firstName',
         header: 'First Name',
-        size: 150,
       },
       {
         accessorKey: 'lastName',
         header: 'Last Name',
-        size: 150,
       },
       {
         header: 'Full Name',
         id: 'fullName',
-        size: 200,
         accessorFn: (row) => {
           const fullName = `${row.firstName} ${row.lastName}`
           return fullName === 'null null' ? '' : fullName
@@ -98,37 +90,28 @@ const UserTable = () => {
   )
 
   return (
-    <div className='p-10'>
+    <div className='p-5'>
       <MaterialReactTable
         columns={columns}
         data={data?.data ?? []}
         manualPagination
         enableRowSelection
+        enablePinning
         enableRowActions
-        muiTableProps={{
-          sx: {
-            border: '1px solid rgba(81, 81, 81, 1)',
-          },
-        }}
-        muiTableHeadCellProps={{
-          sx: {
-            border: '1px solid rgba(81, 81, 81, 1)',
+        enableDensityToggle={false}
+        initialState={{
+          density: 'compact',
+          columnPinning: {
+            right: ['mrt-row-actions'],
+            left: ['mrt-row-select'],
           },
         }}
         muiTableBodyCellProps={{
           sx: {
-            border: '1px solid rgba(81, 81, 81, 1)',
+            paddingBlock: 0,
+            // marginBlock: 0,
+            borderBlock: 0,
           },
-        }}
-        displayColumnDefOptions={{
-          'mrt-row-actions': {
-            muiTableHeadCellProps: {
-              align: 'left',
-            },
-          },
-        }}
-        initialState={{
-          density: 'compact',
         }}
         renderRowActions={({ row }) => {
           return (

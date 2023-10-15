@@ -1,5 +1,5 @@
 import { Controller, useFormContext } from 'react-hook-form'
-import { FormControl, FormHelperText, TextField, InputLabel, MenuItem } from '@mui/material'
+import { FormControl, FormHelperText, TextField, MenuItem } from '@mui/material'
 
 const Select = ({
   name,
@@ -31,13 +31,15 @@ const Select = ({
       defaultValue=''
       render={({ field: { onChange, value }, fieldState: { error } }) => {
         return (
-          <FormControl required={required} error={!!error} fullWidth>
+          <FormControl error={!!error} fullWidth>
             {/* <InputLabel id={label}>{label}</InputLabel> */}
             <TextField
               select
               onChange={onChange}
               value={value}
               label={label}
+              error={!!error}
+              required={required}
               variant='standard'
               fullWidth
             >

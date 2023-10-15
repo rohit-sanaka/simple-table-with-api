@@ -16,6 +16,7 @@ const DeleteCofimationDialog = () => {
     mutationKey: ['Delete User', dialogAndAlertState?.delete?.rowData?.id],
     mutationFn: async (id: string) => await UserService.deleteUser(id),
     onSuccess: () => {
+      dispatch({ type: 'CLOSE_DELETE_DIALOG' })
       dispatch({ type: 'OPEN_ALERT', payload: { msg: `User deleted successfully`, type: 'success' } })
       queryClient.invalidateQueries(['Users'])
     },
@@ -49,6 +50,7 @@ const DeleteCofimationDialog = () => {
             <Button
               variant='contained'
               color='error'
+              disabled={isLoading}
               onClick={() => {
                 if (dialogAndAlertState?.delete?.rowData) {
                   deleteAccount(dialogAndAlertState?.delete?.rowData?.id)
@@ -61,7 +63,7 @@ const DeleteCofimationDialog = () => {
               <CircularProgress
                 size={24}
                 sx={{
-                  color: 'white',
+                  color: 'red',
                   position: 'absolute',
                   top: '50%',
                   left: '50%',
