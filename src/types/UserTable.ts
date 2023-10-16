@@ -10,7 +10,7 @@ export type InititalStateType = {
   }
   delete: {
     openDialog: boolean
-    rowData: null | User
+    rowData: null | User | User[]
   }
   alert: {
     openAlert: boolean
@@ -26,7 +26,7 @@ export type actionType =
   | { type: 'CLOSE_CREATE_DIALOG' }
   | { type: 'OPEN_EDIT_DIALOG'; payload: User }
   | { type: 'CLOSE_EDIT_DIALOG' }
-  | { type: 'OPEN_DELETE_DIALOG'; payload: User }
+  | { type: 'OPEN_DELETE_DIALOG'; payload: User | User[] }
   | { type: 'CLOSE_DELETE_DIALOG' }
   | { type: 'OPEN_ALERT'; payload: { type: alertType; msg: string } }
   | { type: 'CLOSE_ALERT' }

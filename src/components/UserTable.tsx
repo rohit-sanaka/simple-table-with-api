@@ -145,7 +145,13 @@ const UserTable = () => {
             </Tooltip>
             <IconButton
               disabled={!(table.getIsSomeRowsSelected() || table.getIsAllRowsSelected())}
-              onClick={() => console.log(table.getSelectedRowModel())}
+              onClick={() => {
+                const tableData = table.getSelectedRowModel().flatRows.map((row) => {
+                  return row.original
+                })
+                dispatch({ type: 'OPEN_DELETE_DIALOG', payload: tableData })
+              }}
+              title='Delete Selected'
             >
               <Tooltip arrow title='Delete Selected'>
                 <DeleteIcon

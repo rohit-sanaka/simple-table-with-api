@@ -6,24 +6,23 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import UserService from '../services/UserService'
 import { Box } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
+import { AnyObject } from 'yup'
 
 const DeleteCofimationDialog = () => {
   const { dialogAndAlertState, dispatch } = useContext(dialogAndAlertContext)
 
+  const usersToDelete = dialogAndAlertState?.delete?.rowData
   const queryClient = useQueryClient()
 
-  const { mutate: deleteAccount, isLoading } = useMutation({
-    mutationKey: ['Delete User', dialogAndAlertState?.delete?.rowData?.id],
+  const { mutate: deleteAccount, isLoading } = useMutation<AnyObject, AxiosError<AxiosResponse>, string>({
     mutationFn: async (id: string) => await UserService.deleteUser(id),
-    onSuccess: () => {
-      dispatch({ type: 'CLOSE_DELETE_DIALOG' })
-      dispatch({ type: 'OPEN_ALERT', payload: { msg: `User deleted successfully`, type: 'success' } })
-      queryClient.invalidateQueries(['Users'])
-    },
     onError: (error: AxiosError<AxiosResponse>) => {
       dispatch({
         type: 'OPEN_ALERT',
-        payload: { msg: 'Error while deleting user : ' + error?.response?.data?.data?.message, type: 'error' },
+        payload: {
+          msg: 'Error while deleting user : ' + error?.response?.data?.data?.message,
+          type: 'error',
+        },
       })
     },
   })
@@ -34,7 +33,11 @@ const DeleteCofimationDialog = () => {
         <DialogTitle sx={{ fontWeight: 'bold' }}>Confirm Action</DialogTitle>
         <DialogContent>
           Are you sure you want to delete{' '}
-          <span className='font-bold text-purple-700'>{`${dialogAndAlertState?.delete?.rowData?.firstName} ${dialogAndAlertState?.delete?.rowData?.lastName}`}</span>
+          <span className='font-bold text-purple-700'>
+            {Array.isArray(usersToDelete)
+              ? usersToDelete.map((user) => user.firstName + ' ' + user.lastName).join(', ')
+              : `${usersToDelete?.firstName} ${usersToDelete?.lastName}`}
+          </span>
         </DialogContent>
         <DialogActions>
           <Button
@@ -52,8 +55,38 @@ const DeleteCofimationDialog = () => {
               color='error'
               disabled={isLoading}
               onClick={() => {
-                if (dialogAndAlertState?.delete?.rowData) {
-                  deleteAccount(dialogAndAlertState?.delete?.rowData?.id)
+                if (usersToDelete) {
+                  Array.isArray(usersToDelete)
+                    ? usersToDelete.forEach((user) =>
+                        deleteAccount(user.id, {
+                          onSuccess: () => {
+                            dispatch({
+                              type: 'OPEN_ALERT',
+                              payload: {
+                                msg: `All user deleted successfully`,
+                                type: 'success',
+                              },
+                            })
+
+                            dispatch({ type: 'CLOSE_DELETE_DIALOG' })
+                            queryClient.invalidateQueries(['Users'])
+                          },
+                        })
+                      )
+                    : deleteAccount(usersToDelete.id, {
+                        onSuccess: () => {
+                          dispatch({
+                            type: 'OPEN_ALERT',
+                            payload: {
+                              msg: `Deleted User successfully`,
+                              type: 'success',
+                            },
+                          })
+
+                          dispatch({ type: 'CLOSE_DELETE_DIALOG' })
+                          queryClient.invalidateQueries(['Users'])
+                        },
+                      })
                 }
               }}
             >

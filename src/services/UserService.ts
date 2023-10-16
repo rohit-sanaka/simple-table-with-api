@@ -33,7 +33,7 @@ const editUser = async (id: string, data: User) => {
 }
 
 const deleteUser = async (id: string) => {
-  const responce = await apiClient.delete<User>(`/user/${id}`)
+  const responce = await apiClient.delete<{ id: string }>(`/user/${id}`)
   return responce
 }
 
