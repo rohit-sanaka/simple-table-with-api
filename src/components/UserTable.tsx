@@ -1,18 +1,18 @@
-import { useQuery } from '@tanstack/react-query'
-import UserService from '../services/UserService'
-import { User, UserList } from '../types/User'
-import { useState, useMemo, Fragment, useContext } from 'react'
+import { User } from '../types/User'
+import { useState, useMemo, Fragment, useContext, lazy, Suspense } from 'react'
 import { MaterialReactTable, MRT_PaginationState, MRT_ColumnDef } from 'material-react-table'
-import { IconButton, Tooltip, Box, Snackbar, Alert, ThemeProvider } from '@mui/material'
+import { IconButton, Tooltip, Box, Snackbar, Alert, ThemeProvider, CircularProgress } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-import CreateNewAccountDialog from './CreateNewAccountDialog'
-import EditAccountDialog from './EditAccountDialog'
 import DeleteCofimationDialog from './DeleteCofimationDialog'
 import { dialogAndAlertContext } from '../contexts/DialogAndAlertProvider'
-import { formLabelsTheme } from '../MuiTheme/MuiTheme'
+import { formLabelsTheme } from '../muiTheme/MuiTheme'
+import useGetUsers from '../hooks/useGetUsers'
+import FormDialog from './FormDialog'
+const EditAccountForm = lazy(() => import('./EditAccountForm'))
+const CreateAccountForm = lazy(() => import('./CreateAccountForm'))
 
 const UserTable = () => {
   const [pagination, setPagination] = useState<MRT_PaginationState>({
@@ -21,23 +21,9 @@ const UserTable = () => {
   })
 
   const { dialogAndAlertState, dispatch } = useContext(dialogAndAlertContext)
+  const { data, isLoading, isFetching, error, isError, refetch: refetchUsers } = useGetUsers({ pagination })
 
-  const {
-    data,
-    isLoading,
-    isFetching,
-    error,
-    isError,
-    refetch: refetchUsers,
-  } = useQuery<UserList, Error>({
-    queryKey: ['Users', pagination],
-    queryFn: async () => await UserService.getUsers(pagination.pageIndex, pagination.pageSize),
-    keepPreviousData: true,
-    retry: 2,
-    refetchOnWindowFocus: false,
-  })
-
-  const handleClose = (_event?: React.SyntheticEvent | Event, reason?: string) => {
+  const handleAlertClose = (_event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return
     }
@@ -90,7 +76,7 @@ const UserTable = () => {
   )
 
   return (
-    <div className='p-5'>
+    <div className='relative p-5'>
       <MaterialReactTable
         columns={columns}
         data={data?.data ?? []}
@@ -157,16 +143,16 @@ const UserTable = () => {
                 <AddIcon />
               </IconButton>
             </Tooltip>
-            <Tooltip arrow title='Delete Selected'>
-              <IconButton
-                disabled={!(table.getIsSomeRowsSelected() || table.getIsAllRowsSelected())}
-                onClick={() => console.log(table.getSelectedRowModel())}
-              >
+            <IconButton
+              disabled={!(table.getIsSomeRowsSelected() || table.getIsAllRowsSelected())}
+              onClick={() => console.log(table.getSelectedRowModel())}
+            >
+              <Tooltip arrow title='Delete Selected'>
                 <DeleteIcon
                   color={`${table.getIsSomeRowsSelected() || table.getIsAllRowsSelected() ? 'error' : 'disabled'}`}
                 />
-              </IconButton>
-            </Tooltip>
+              </Tooltip>
+            </IconButton>
           </div>
         )}
         rowCount={data?.total}
@@ -178,21 +164,55 @@ const UserTable = () => {
         }}
       />
       <ThemeProvider theme={formLabelsTheme}>
-        <CreateNewAccountDialog />
+        <Suspense
+          fallback={
+            <CircularProgress
+              size={75}
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                marginTop: '-12px',
+                marginLeft: '-12px',
+              }}
+            />
+          }
+        >
+          <FormDialog open={dialogAndAlertState.edit.openDialog} title='Edit User Details'>
+            <EditAccountForm />
+          </FormDialog>
+        </Suspense>
+        <Suspense
+          fallback={
+            <CircularProgress
+              size={75}
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                marginTop: '-12px',
+                marginLeft: '-12px',
+              }}
+            />
+          }
+        >
+          <FormDialog open={dialogAndAlertState.create.openDialog} title='Create New Account'>
+            <CreateAccountForm />
+          </FormDialog>
+        </Suspense>
         <DeleteCofimationDialog />
-        <EditAccountDialog />
       </ThemeProvider>
 
       <Snackbar
         open={dialogAndAlertState.alert.openAlert}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         autoHideDuration={6000}
-        onClose={handleClose}
+        onClose={handleAlertClose}
       >
         <Alert
           severity={`${dialogAndAlertState.alert.alertType ?? 'success'}`}
           sx={{ width: '100%' }}
-          onClose={handleClose}
+          onClose={handleAlertClose}
         >
           {dialogAndAlertState.alert.alertMsg}
         </Alert>

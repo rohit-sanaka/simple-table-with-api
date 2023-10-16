@@ -5,19 +5,18 @@ import { Box, Button, Grid, CircularProgress } from '@mui/material'
 import { User } from '../types/User'
 import TextField from '../RHF_Input_Templets/RHF_TextField'
 import { dialogAndAlertContext } from '../contexts/DialogAndAlertProvider'
-import { useContext, useEffect } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import UserService from '../services/UserService'
-import { AxiosError, AxiosResponse } from 'axios'
+import { useContext } from 'react'
 import { FormControl, FormLabel } from '@mui/material'
 import Select from '../RHF_Input_Templets/RHF_SelectField'
 import Radio from '../RHF_Input_Templets/RHF_RadioGroup'
 import DatePicker from '../RHF_Input_Templets/RHF_DatePicker'
-import timezonesArray from '../utils/timezoneObject'
+import timezones from '../utils/timezoneObject'
 import AutoComplete from '../RHF_Input_Templets/RHF_AutoComplete'
+import useEditUser from '../hooks/useEditUser'
+import useGetUser from '../hooks/useGetUser'
 
 const titleOptinos = [
-  { value: '', label: '--None--' },
+  { value: '', label: '----Select----' },
   { value: 'mr', label: 'Mr' },
   { value: 'mrs', label: 'Mrs' },
   { value: 'miss', label: 'Miss' },
@@ -30,8 +29,6 @@ const genderOptions = [
   { value: 'female', label: 'Female' },
   { value: 'other', label: 'Other' },
 ]
-
-const timezones = timezonesArray
 
 const schema: yup.AnyObjectSchema = yup.object().shape({
   title: yup.string().required('Title is required'),
@@ -61,7 +58,6 @@ const schema: yup.AnyObjectSchema = yup.object().shape({
 
 const EditAccountForm = () => {
   const { dialogAndAlertState, dispatch } = useContext(dialogAndAlertContext)
-  const queryClient = useQueryClient()
 
   const defaultValues: User = {
     id: '',
@@ -82,60 +78,44 @@ const EditAccountForm = () => {
   }
 
   const {
-    data,
+    data: userData,
     isLoading: isLoadingUser,
     isFetching: isFetchingUser,
     isError: isErrorFetchingUser,
-  } = useQuery<User, AxiosError<AxiosResponse> | Error>({
-    queryKey: ['User', dialogAndAlertState?.edit?.rowData?.id],
-    queryFn: async () => await UserService.getUser(dialogAndAlertState?.edit?.rowData?.id ?? ' '),
-    retry: 2,
-    refetchOnWindowFocus: false,
-  })
+  } = useGetUser(dialogAndAlertState?.edit?.rowData?.id ?? ' ')
 
-  useEffect(() => {
-    if (isErrorFetchingUser) {
-      dispatch({
-        type: 'OPEN_ALERT',
-        payload: { msg: `Error while fetching user `, type: 'error' },
-      })
-    }
-  }, [isErrorFetchingUser, dispatch])
+  if (isErrorFetchingUser) {
+    dispatch({
+      type: 'OPEN_ALERT',
+      payload: { msg: `Error while fetching user `, type: 'error' },
+    })
+  }
 
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: defaultValues,
-    reValidateMode: 'onChange',
-    values: data,
+    values: userData,
   })
 
-  const { mutate: editAccount, isLoading } = useMutation({
-    mutationKey: ['Edit User', dialogAndAlertState?.edit?.rowData?.id],
-    mutationFn: async (user: User) => await UserService.editUser(dialogAndAlertState?.edit?.rowData?.id ?? ' ', user),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['Users'])
-      dispatch({ type: 'OPEN_ALERT', payload: { msg: `User updated successfully`, type: 'success' } })
-      dispatch({ type: 'CLOSE_EDIT_DIALOG' })
-    },
-    onError: (error: AxiosError<AxiosResponse>) => {
-      if (error?.response) {
-        const serverErrors = error?.response?.data?.data
-        for (const field in serverErrors) {
-          methods.setError(field, {
-            type: 'manual',
-            message: serverErrors[field],
-          })
-        }
-      }
-      dispatch({
-        type: 'OPEN_ALERT',
-        payload: { msg: `Error while updating user : ${error?.response?.data?.data?.message}`, type: 'success' },
+  const {
+    mutate: editAccount,
+    isLoading: isEditingAccount,
+    isError: isErrorEditingAccount,
+    error: errorEditingAccount,
+  } = useEditUser(dialogAndAlertState?.edit?.rowData?.id ?? ' ')
+
+  if (isErrorEditingAccount && errorEditingAccount?.response) {
+    const serverErrors = errorEditingAccount?.response?.data?.data
+    for (const field in serverErrors) {
+      methods.setError(field, {
+        type: 'server',
+        message: serverErrors[field],
       })
-    },
-  })
+    }
+  }
 
   const onSubmit = (data: User) => {
-    if (!isLoading) {
+    if (!isEditingAccount) {
       editAccount(data)
     }
   }
@@ -207,10 +187,10 @@ const EditAccountForm = () => {
                 Cancel
               </Button>
               <Box sx={{ m: 1, position: 'relative' }}>
-                <Button type='submit' variant='contained' disabled={isLoading}>
+                <Button type='submit' variant='contained' disabled={isEditingAccount}>
                   Submit
                 </Button>
-                {isLoading && (
+                {isEditingAccount && (
                   <CircularProgress
                     size={24}
                     sx={{

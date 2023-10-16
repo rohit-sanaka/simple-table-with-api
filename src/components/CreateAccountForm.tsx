@@ -4,17 +4,15 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { Box, Button, Grid, CircularProgress } from '@mui/material'
 import { User } from '../types/User'
 import TextField from '../RHF_Input_Templets/RHF_TextField'
-import { dialogAndAlertContext } from '../contexts/DialogAndAlertProvider'
-import { useContext } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import UserService from '../services/UserService'
-import { AxiosError, AxiosResponse } from 'axios'
 import { FormControl, FormLabel } from '@mui/material'
 import Select from '../RHF_Input_Templets/RHF_SelectField'
 import Radio from '../RHF_Input_Templets/RHF_RadioGroup'
 import DatePicker from '../RHF_Input_Templets/RHF_DatePicker'
 import timezones from '../utils/timezoneObject'
 import AutoComplete from '../RHF_Input_Templets/RHF_AutoComplete'
+import useCreateUser from '../hooks/useCreateUser'
+import { dialogAndAlertContext } from '../contexts/DialogAndAlertProvider'
+import { useContext } from 'react'
 
 const titleOptinos = [
   { value: '', label: '--None--' },
@@ -63,54 +61,44 @@ const schema: yup.AnyObjectSchema = yup.object().shape({
   }),
 })
 
+const defaultValues = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  dateOfBirth: null,
+  phone: '',
+  title: '',
+  gender: '',
+  picture: '',
+  location: {
+    street: '',
+    city: '',
+    state: '',
+    country: '',
+    timezone: '',
+  },
+}
+
 const CreateAccountForm = () => {
-  const queryClient = useQueryClient()
   const { dispatch } = useContext(dialogAndAlertContext)
 
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      dateOfBirth: null,
-      phone: '',
-      title: '',
-      gender: '',
-      picture: '',
-      location: {
-        street: '',
-        city: '',
-        state: '',
-        country: '',
-        timezone: '',
-      },
-    },
+    defaultValues: defaultValues,
   })
 
-  const { mutate: createAccount, isLoading } = useMutation({
-    mutationKey: ['create User'],
-    mutationFn: async (user: User) => await UserService.createUser(user),
+  const { mutate: createAccount, isLoading, isError, error } = useCreateUser()
 
-    onSuccess: () => {
-      queryClient.invalidateQueries(['Users'])
-      dispatch({ type: 'CLOSE_CREATE_DIALOG' })
-      dispatch({ type: 'OPEN_ALERT', payload: { msg: 'Account created successfully', type: 'success' } })
-    },
+  if (isError && error?.response) {
+    const serverErrors = error?.response?.data?.data
+    for (const field in serverErrors) {
+      methods.setError(field, {
+        type: 'server',
+        message: serverErrors[field],
+      })
+    }
+  }
 
-    onError: (error: AxiosError<AxiosResponse>) => {
-      if (error?.response) {
-        const serverErrors = error?.response?.data?.data
-        for (const field in serverErrors) {
-          methods.setError(field, {
-            type: 'manual',
-            message: serverErrors[field],
-          })
-        }
-      }
-      dispatch({ type: 'OPEN_ALERT', payload: { msg: 'Please input valid data', type: 'error' } })
-    },
-  })
   const onSubmit = (data: User) => {
     if (!isLoading) {
       createAccount(data)
