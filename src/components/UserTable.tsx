@@ -8,7 +8,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import DeleteCofimationDialog from './DeleteCofimationDialog'
 import { dialogAndAlertContext } from '../contexts/DialogAndAlertProvider'
-import { formLabelsTheme } from '../muiTheme/MuiTheme'
+import { MuiCustomTheme } from '../MuiTheme/MuiTheme'
 import useGetUsers from '../hooks/useGetUsers'
 import FormDialog from './FormDialog'
 const EditAccountForm = lazy(() => import('./EditAccountForm'))
@@ -169,7 +169,7 @@ const UserTable = () => {
           showProgressBars: isFetching || isLoading,
         }}
       />
-      <ThemeProvider theme={formLabelsTheme}>
+      <ThemeProvider theme={MuiCustomTheme}>
         <Suspense
           fallback={
             <CircularProgress

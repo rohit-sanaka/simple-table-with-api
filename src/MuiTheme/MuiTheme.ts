@@ -1,6 +1,6 @@
 import { createTheme } from '@mui/material/styles'
 
-export const formLabelsTheme = createTheme({
+export const MuiCustomTheme = createTheme({
   components: {
     MuiFormLabel: {
       styleOverrides: {
