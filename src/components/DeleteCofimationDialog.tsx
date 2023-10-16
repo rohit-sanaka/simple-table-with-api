@@ -63,7 +63,7 @@ const DeleteCofimationDialog = () => {
                             dispatch({
                               type: 'OPEN_ALERT',
                               payload: {
-                                msg: `All user deleted successfully`,
+                                msg: `All selected users deleted successfully`,
                                 type: 'success',
                               },
                             })
